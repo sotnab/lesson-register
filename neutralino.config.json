@@ -1,0 +1,39 @@
+{
+  "applicationId": "js.neutralino.zero",
+  "version": "1.0.0",
+  "defaultMode": "window",
+  "documentRoot": "/react-app/build/",
+  "port": 4000,
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "nativeAllowList": [
+    "app.*",
+    "os.*",
+    "filesystem.*",
+    "extensions.*"
+  ],
+  "modes": {
+    "window": {
+      "title": "Lesson Register",
+      "width": 1024,
+      "height": 684,
+      "minWidth": 720,
+      "minHeight": 500,
+      "icon": "/react-app/public/logo192.png",
+      "enableInspector": true
+    }
+  },
+  "cli": {
+    "binaryName": "lesson-register",
+    "resourcesPath": "/react-app/build/",
+    "extensionsPath": "/extensions/",
+    "clientLibrary": "/react-app/public/neutralino.js",
+    "binaryVersion": "4.2.0",
+    "clientVersion": "3.1.0",
+    "frontendLibrary": {
+      "patchFile": "/react-app/public/index.html",
+      "devUrl": "http://localhost:3000"
+    }
+  }
+}
