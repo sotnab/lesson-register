@@ -3,6 +3,7 @@ import { Box, Tab, Tabs } from '@mui/material'
 import { useState } from 'react';
 
 import Lessons from './components/Lessons';
+import Groups from './components/Groups'
 
 function App() {
   const [tab, setTab] = useState(0)
@@ -27,8 +28,8 @@ function App() {
         <Lessons />
       </Box>
 
-      <Box hidden={tab !== 1}>
-        Groups
+      <Box hidden={tab !== 1} sx={{ flexGrow: 1 }}>
+        <Groups />
       </Box>
     </Box>
   )

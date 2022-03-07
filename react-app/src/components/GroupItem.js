@@ -1,10 +1,7 @@
-import { Class, Delete } from '@mui/icons-material';
+import { Delete, School } from '@mui/icons-material';
 import { IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
-const LessonItem = ({ data, openDialog }) => {
-   const date = new Date(0)
-   date.setSeconds(data.get('date').seconds)
-
+const GroupItem = ({ data, openDialog }) => {
    return (
       <ListItem
          disablePadding
@@ -24,15 +21,14 @@ const LessonItem = ({ data, openDialog }) => {
          }
       >
          <ListItemButton>
-            <ListItemIcon children={<Class />} />
+            <ListItemIcon children={<School />} />
             <ListItemText
-               primary={data.get('topic')}
+               primary={data.get('name')}
                primaryTypographyProps={{ variant: 'h6' }}
-               secondary={date.toLocaleDateString('fr-FR')}
             />
          </ListItemButton>
       </ListItem>
    )
 }
 
-export default LessonItem;
+export default GroupItem;
