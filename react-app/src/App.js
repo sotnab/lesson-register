@@ -1,37 +1,73 @@
+import { useEffect, useState } from 'react';
+import { collection, getFirestore, onSnapshot } from 'firebase/firestore';
 import { Class, School } from '@mui/icons-material';
 import { Box, Tab, Tabs } from '@mui/material'
-import { useState } from 'react';
 
-import Lessons from './components/Lessons';
-import Groups from './components/Groups'
+import { app } from './utils/firebase';
+import Lessons from './components/lessons/Lessons';
+import Groups from './components/groups/Groups'
+import { globalStyles, menuWidth } from './utils/styles';
+import { dataContext } from './utils/dataContext';
 
-function App() {
+const App = () => {
   const [tab, setTab] = useState(0)
+
+  const [lessons, setLessons] = useState([])
+  const [groups, setGroups] = useState([])
+  const [lessonsLoaded, setLessonsLoaded] = useState(false)
+  const [groupsLoaded, setGroupsLoaded] = useState(false)
 
   const changeTab = (event, value) => {
     setTab(value)
   }
 
+  useEffect(() => {
+    const db = getFirestore(app)
+
+    const unsubLessons = onSnapshot(collection(db, 'lessons'), (data) => {
+      if (!lessonsLoaded) setLessonsLoaded(true)
+      setLessons(data.docs)
+    });
+
+    const unsubGroups = onSnapshot(collection(db, 'groups'), (data) => {
+      if (!groupsLoaded) setGroupsLoaded(true)
+      setGroups(data.docs)
+    });
+
+    return () => {
+      unsubLessons()
+      unsubGroups()
+    }
+  }, []);
+
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      <Tabs
-        orientation="vertical"
-        value={tab}
-        onChange={changeTab}
-        sx={{ borderRight: 1, borderColor: 'divider' }}
-      >
-        <Tab label="Lessons" icon={<Class />} iconPosition="start" />
-        <Tab label="Groups" icon={<School />} iconPosition="start" />
-      </Tabs>
+    <dataContext.Provider value={{
+      lessons,
+      lessonsLoaded,
+      groups,
+      groupsLoaded
+    }}>
+      {globalStyles}
+      <Box style={{ display: 'flex', height: '100vh' }}>
+        <Tabs
+          orientation="vertical"
+          value={tab}
+          onChange={changeTab}
+          sx={{ borderRight: 1, borderColor: 'divider', width: menuWidth }}
+        >
+          <Tab label="Lessons" icon={<Class />} iconPosition="start" />
+          <Tab label="Groups" icon={<School />} iconPosition="start" />
+        </Tabs>
 
-      <Box hidden={tab !== 0} sx={{ flexGrow: 1 }}>
-        <Lessons />
-      </Box>
+        <Box hidden={tab !== 0} sx={{ flexGrow: 1 }}>
+          <Lessons />
+        </Box>
 
-      <Box hidden={tab !== 1} sx={{ flexGrow: 1 }}>
-        <Groups />
+        <Box hidden={tab !== 1} sx={{ flexGrow: 1 }}>
+          <Groups />
+        </Box>
       </Box>
-    </Box>
+    </dataContext.Provider>
   )
 }
 

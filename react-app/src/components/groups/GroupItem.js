@@ -1,7 +1,9 @@
 import { Delete, School } from '@mui/icons-material';
 import { IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
-const GroupItem = ({ data, openDialog }) => {
+const GroupItem = ({ data, openDialog, openModal }) => {
+
+
    return (
       <ListItem
          disablePadding
@@ -20,7 +22,7 @@ const GroupItem = ({ data, openDialog }) => {
             </IconButton>
          }
       >
-         <ListItemButton>
+         <ListItemButton onClick={() => openModal(data.id)}>
             <ListItemIcon children={<School />} />
             <ListItemText
                primary={data.get('name')}
