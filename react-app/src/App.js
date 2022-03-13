@@ -1,52 +1,22 @@
-import { useEffect, useState } from 'react';
-import { collection, getFirestore, onSnapshot } from 'firebase/firestore';
-import { Class, School } from '@mui/icons-material';
+import { useState } from 'react'
 import { Box, Tab, Tabs } from '@mui/material'
+import { Class, Person, School } from '@mui/icons-material'
+import { globalStyles, menuWidth, tabProps } from './utils/styles'
 
-import { app } from './utils/firebase';
-import Lessons from './components/lessons/Lessons';
+import Lessons from './components/lessons/Lessons'
 import Groups from './components/groups/Groups'
-import { globalStyles, menuWidth } from './utils/styles';
-import { dataContext } from './utils/dataContext';
+import Students from './components/students/Students'
+import ContextProvider from './utils/ContextProvider'
 
 const App = () => {
   const [tab, setTab] = useState(0)
-
-  const [lessons, setLessons] = useState([])
-  const [groups, setGroups] = useState([])
-  const [lessonsLoaded, setLessonsLoaded] = useState(false)
-  const [groupsLoaded, setGroupsLoaded] = useState(false)
 
   const changeTab = (event, value) => {
     setTab(value)
   }
 
-  useEffect(() => {
-    const db = getFirestore(app)
-
-    const unsubLessons = onSnapshot(collection(db, 'lessons'), (data) => {
-      if (!lessonsLoaded) setLessonsLoaded(true)
-      setLessons(data.docs)
-    });
-
-    const unsubGroups = onSnapshot(collection(db, 'groups'), (data) => {
-      if (!groupsLoaded) setGroupsLoaded(true)
-      setGroups(data.docs)
-    });
-
-    return () => {
-      unsubLessons()
-      unsubGroups()
-    }
-  }, []);
-
   return (
-    <dataContext.Provider value={{
-      lessons,
-      lessonsLoaded,
-      groups,
-      groupsLoaded
-    }}>
+    <ContextProvider>
       {globalStyles}
       <Box style={{ display: 'flex', height: '100vh' }}>
         <Tabs
@@ -55,20 +25,19 @@ const App = () => {
           onChange={changeTab}
           sx={{ borderRight: 1, borderColor: 'divider', width: menuWidth }}
         >
-          <Tab label="Lessons" icon={<Class />} iconPosition="start" />
-          <Tab label="Groups" icon={<School />} iconPosition="start" />
+          <Tab label="Lessons" icon={<Class />} {...tabProps} />
+          <Tab label="Groups" icon={<School />} {...tabProps} />
+          <Tab label="Students" icon={<Person />} {...tabProps} />
         </Tabs>
 
-        <Box hidden={tab !== 0} sx={{ flexGrow: 1 }}>
-          <Lessons />
-        </Box>
-
-        <Box hidden={tab !== 1} sx={{ flexGrow: 1 }}>
-          <Groups />
+        <Box sx={{ flexGrow: 1 }}>
+          {tab === 0 && <Lessons />}
+          {tab === 1 && <Groups />}
+          {tab === 2 && <Students />}
         </Box>
       </Box>
-    </dataContext.Provider>
+    </ContextProvider>
   )
 }
 
-export default App;
+export default App

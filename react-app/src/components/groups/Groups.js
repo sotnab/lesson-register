@@ -1,32 +1,31 @@
 import { useContext, useState } from 'react';
-import { Alert, AppBar, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, List, Modal, Paper, Slide, Toolbar, Typography } from '@mui/material';
+import { Alert, Box, List, Typography } from '@mui/material';
 import GroupItem from './GroupItem';
 
-import { dataContext } from '../../utils/dataContext';
+import { DataContext, UiContext } from '../../utils/context';
 import GroupItemSkeleton from './GroupItemSkeleton';
-import { modalStyles, toolbarStyles } from '../../utils/styles';
-import { ArrowBack } from '@mui/icons-material';
+import GroupModal from './GroupModal';
+import ItemModal from '../ItemModal';
+import { scrollableStyles } from '../../utils/styles';
 
 const Lessons = () => {
    const [modalOpen, setModalOpen] = useState(false)
-   const [dialogOpen, setDialogOpen] = useState(false)
-   const [group, setGroup] = useState('')
+   const [group, setGroup] = useState(null)
 
-   const data = useContext(dataContext)
+   const data = useContext(DataContext)
+   const ui = useContext(UiContext)
 
-   const openDialog = (id) => {
-      if (dialogOpen) return
-      setGroup(id)
-      setDialogOpen(true)
+   const openDialog = (item) => {
+      setGroup(item)
+      ui.openDialog('Group', () => {
+         console.log(`Delete group: ${item.get('name')}`)
+         ui.closeDialog()
+      })
    }
 
-   const closeDialog = () => {
-      setDialogOpen(false)
-   }
-
-   const openModal = (id) => {
+   const openModal = (item) => {
       if (modalOpen) return
-      setGroup(id)
+      setGroup(item)
       setModalOpen(true)
    }
 
@@ -34,12 +33,9 @@ const Lessons = () => {
       setModalOpen(false)
    }
 
-   const deleteItem = () => {
-   }
-
 
    return (
-      <Box sx={{ px: 2 }}>
+      <Box sx={scrollableStyles}>
          <List>
             {(data.groups.length === 0 && data.groupsLoaded) && (
                <Alert severity="info" sx={{ mx: 'auto', minWidth: 400, width: 'fit-content' }}>
@@ -52,53 +48,19 @@ const Lessons = () => {
             {!data.groupsLoaded && <GroupItemSkeleton />}
 
             {data.groups.map((item) =>
-               <GroupItem
-                  data={item}
-                  key={item.id}
-                  openDialog={openDialog}
-                  openModal={openModal}
-               />
+               <GroupItem item={item} key={item.id} openModal={() => openModal(item)} />
             )}
          </List>
 
-         <Dialog open={dialogOpen} onClose={closeDialog}>
-            <DialogTitle>Delete Group?</DialogTitle>
-            <DialogContent>
-               <DialogContentText>
-                  Are you sure to delete group: {data.groups.find(({ id }) => id === group)?.topic}
-               </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-               <Button color="error" onClick={() => deleteItem(group)}>Delete</Button>
-               <Button onClick={closeDialog} autoFocus>Cancel</Button>
-            </DialogActions>
-         </Dialog>
-
-         <Modal open={modalOpen} onClose={closeModal}>
-            <Slide direction="left" in={modalOpen} >
-               <Box sx={modalStyles}>
-                  <Toolbar sx={toolbarStyles}>
-                     <IconButton
-                        size="large"
-                        edge="start"
-                        color="inherit"
-                        onClick={closeModal}
-                     >
-                        <ArrowBack />
-                     </IconButton>
-                  </Toolbar>
-
-                  <Box sx={{ p: 2 }}>
-                     <Typography variant="h6" component="h2">
-                        Text in a modal
-                     </Typography>
-                     <Typography sx={{ mt: 2 }}>
-                        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-                     </Typography>
-                  </Box>
-               </Box>
-            </Slide>
-         </Modal>
+         <ItemModal
+            open={modalOpen}
+            item={group}
+            close={closeModal}
+            deleteItem={openDialog}
+            title={group?.get('name')}
+         >
+            <GroupModal item={group} />
+         </ItemModal>
       </Box>
    )
 }

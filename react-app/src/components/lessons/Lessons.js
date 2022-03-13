@@ -1,31 +1,56 @@
-import { useContext, useState } from 'react';
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, List, Typography } from '@mui/material';
-import LessonItem from './LessonItem';
-import LessonItemSkeleton from './LessonItemSkeleton';
+import { useContext, useEffect, useState } from 'react'
+import { Alert, Box, List, Typography } from '@mui/material'
+import { scrollableStyles } from '../../utils/styles'
+import { DataContext, UiContext } from '../../utils/context'
 
-import { dataContext } from '../../utils/dataContext';
+import LessonItem from './LessonItem'
+import LessonItemSkeleton from './LessonItemSkeleton'
+import LessonModal from './LessonModal'
+import ItemModal from '../ItemModal'
+import ActionBar from '../ActionBar'
+import AddModal from './AddModal'
 
 const Lessons = () => {
-   const [open, setOpen] = useState(false)
-   const [lesson, setLesson] = useState('')
+   const [modalOpen, setModalOpen] = useState(false)
+   const [addOpen, setAddOpen] = useState(false)
+   const [lesson, setLesson] = useState(null)
+   const [search, setSearch] = useState('')
 
-   const data = useContext(dataContext)
+   const data = useContext(DataContext)
+   const ui = useContext(UiContext)
 
-   const openDialog = (id) => {
-      if (open) return
-      setLesson(id)
-      setOpen(true)
+   const openDialog = (item) => {
+      setLesson(item)
+      ui.openDialog('Lesson', () => {
+         console.log(`Delete lesson: ${item.get('topic')}`)
+         ui.closeDialog()
+      })
    }
 
-   const closeDialog = () => {
-      setOpen(false)
+   const openModal = (item) => {
+      if (modalOpen) return
+      setLesson(item)
+      setModalOpen(true)
    }
 
-   const deleteItem = () => {
-   }
+   const closeModal = () => setModalOpen(false)
+   const openAdd = () => setAddOpen(true)
+   const closeAdd = () => setAddOpen(false)
+
+   useEffect(() => {
+      if (!lesson) return
+
+      const actualLesson = data.lessons.find((item) => item.id === lesson.id)
+      if (actualLesson.length) {
+         setLesson(actualLesson)
+      } else {
+         setModalOpen(false)
+      }
+
+   }, [data.lessons])
 
    return (
-      <Box sx={{ height: '100%', px: 2, overflowY: 'scroll' }}>
+      <Box sx={scrollableStyles}>
          <List>
             {(data.lessons.length === 0 && data.lessonsLoaded) && (
 
@@ -38,24 +63,26 @@ const Lessons = () => {
 
             {!data.lessonsLoaded && <LessonItemSkeleton />}
 
-            {data.lessons.map((item) => (
-               <LessonItem data={item} key={item.id} openDialog={openDialog} />
-            ))}
+            {data.lessons
+               .filter((item) => item.get('topic').includes(search))
+               .map((item) => (
+                  <LessonItem item={item} key={item.id} openModal={() => openModal(item)} />
+               ))}
 
          </List>
 
-         <Dialog open={open} onClose={closeDialog}>
-            <DialogTitle>Delete Lesson?</DialogTitle>
-            <DialogContent>
-               <DialogContentText>
-                  Are you sure to delete lesson: {data.lessons.find(({ id }) => id === lesson)?.topic}
-               </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-               <Button color="error" onClick={() => deleteItem(lesson)}>Delete</Button>
-               <Button onClick={closeDialog} autoFocus>Cancel</Button>
-            </DialogActions>
-         </Dialog>
+         <ItemModal
+            open={modalOpen}
+            item={lesson}
+            close={closeModal}
+            deleteItem={openDialog}
+            title={lesson?.get('topic')}
+         >
+            <LessonModal item={lesson} />
+         </ItemModal>
+
+         <AddModal open={addOpen} close={closeAdd} />
+         <ActionBar value={search} setValue={setSearch} setOpen={openAdd} />
       </Box>
    )
 }

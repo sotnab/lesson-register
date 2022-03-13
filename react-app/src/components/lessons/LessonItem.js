@@ -1,32 +1,16 @@
-import { Class, Delete } from '@mui/icons-material';
-import { IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Class } from '@mui/icons-material';
+import { ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 
-const LessonItem = ({ data, openDialog }) => {
+const LessonItem = ({ item, openModal }) => {
    const date = new Date(0)
-   date.setSeconds(data.get('date').seconds)
+   date.setSeconds(item.get('date').seconds)
 
    return (
-      <ListItem
-         disablePadding
-         sx={{
-            '&:hover .delete-button': {
-               visibility: 'visible'
-            }
-         }}
-         secondaryAction={
-            <IconButton
-               onClick={() => openDialog(data.id)}
-               className="delete-button"
-               sx={{ visibility: 'hidden' }}
-            >
-               <Delete />
-            </IconButton>
-         }
-      >
-         <ListItemButton>
+      <ListItem disablePadding>
+         <ListItemButton onClick={openModal}>
             <ListItemIcon children={<Class />} />
             <ListItemText
-               primary={data.get('topic')}
+               primary={item.get('topic')}
                primaryTypographyProps={{ variant: 'h6' }}
                secondary={date.toLocaleDateString('fr-FR')}
             />
